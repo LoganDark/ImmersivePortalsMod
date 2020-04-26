@@ -125,11 +125,6 @@ public class CollisionHelper {
         Function<Vec3d, Vec3d> handleCollisionFunc,
         Box originalBoundingBox
     ) {
-        if (collidingPortal.rotation != null) {
-            //handling collision with rotating portal is hard to implement
-            return attemptedMove;
-        }
-        
         Box boxOtherSide = getCollisionBoxOtherSide(
             collidingPortal,
             originalBoundingBox,
@@ -153,7 +148,7 @@ public class CollisionHelper {
         McHelper.setPosAndLastTickPos(entity, oldPos, oldLastTickPos);
         entity.setBoundingBox(originalBoundingBox);
         
-        return move2;
+        return collidingPortal.untransformLocalVec(move2);
     }
     
     private static Vec3d getThisSideMove(
@@ -198,11 +193,10 @@ public class CollisionHelper {
         Box originalBox,
         Vec3d attemptedMove
     ) {
-        Vec3d teleportation = portal.destination.subtract(portal.getPos());
         return clipBox(
-            originalBox.offset(teleportation),
-            portal.destination.subtract(attemptedMove),
-            portal.getNormal().multiply(-1)
+            portal.transformBox(originalBox),
+            portal.transformLocalVec(attemptedMove.multiply(-1)),
+            portal.getContentDirection()
         );
     }
     
